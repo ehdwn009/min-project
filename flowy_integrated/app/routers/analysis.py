@@ -1,7 +1,8 @@
 # app/routers/analysis.py
 import json
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form, BackgroundTasks # BackgroundTasks 추가
 from typing import Optional, List, Any
+from pydantic import BaseModel, EmailStr # BaseModel, EmailStr 추가
 from openai import OpenAI
 
 from app.dependencies import get_openai_client, get_stt_pipeline # dependencies.py 에서 가져옴
@@ -15,12 +16,14 @@ from app.services.stt_service import process_uploaded_rc_file_to_text
 from app.services.summarizer_service import get_meeting_summary
 from app.services.action_item_service import extract_and_assign_action_items
 from app.services.relevance_service import analyze_sentence_relevance_service
+from app.services.email_service import send_analysis_report_email # 이메일 서비스 임포트
 
 router = APIRouter()
 
 @router.post("/analyze", response_model=FullAnalysisResult)
 async def analyze_meeting_endpoint(
     metadata_json: str = Form(..., description="회의 주제, 일시, 장소, 참석자 정보(배열)를 포함하는 JSON 문자열"), # 프론트와 필드명 일치 (예: "metadata")
+    # BackgroundTasks 제거
     rc_file: Optional[UploadFile] = File(None, description="녹음 파일 (m4a, wav 등)"),
     openai_client: OpenAI = Depends(get_openai_client),
     stt_pipeline: Optional[Any] = Depends(get_stt_pipeline)
@@ -137,3 +140,32 @@ async def analyze_meeting_endpoint(
         action_items_result=action_items_result_data,
         feedback_result=feedback_result_data
     )
+
+# --- 새로운 이메일 발송 엔드포인트 ---
+class SendEmailRequest(BaseModel):
+    analysis_result: FullAnalysisResult
+    # custom_recipients: Optional[List[EmailStr]] = None # 필요시 프론트에서 수신자 직접 지정
+
+@router.post("/send-analysis-email", status_code=202) # 202 Accepted: 요청 접수, 비동기 처리
+async def send_analysis_email_via_button(
+    request_data: SendEmailRequest,
+    background_tasks: BackgroundTasks # 이메일 발송은 백그라운드에서
+):
+    analysis_data = request_data.analysis_result
+    recipients_emails = [
+        attendee.email for attendee in analysis_data.meeting_info.info_n if attendee.email and attendee.email.strip()
+    ]
+
+    if not recipients_emails:
+        raise HTTPException(status_code=400, detail="분석 결과에 유효한 수신자 이메일 주소가 없거나, 참석자 정보에 이메일이 없습니다.")
+
+    email_subject = f"[Flowy] '{analysis_data.meeting_info.subj}' 회의 분석 결과입니다."
+    
+    background_tasks.add_task(
+        send_analysis_report_email,
+        recipients=recipients_emails,
+        subject=email_subject,
+        analysis_data=analysis_data
+    )
+    
+    return {"message": "회의록 분석 결과 이메일 발송 요청이 접수되었습니다. 백그라운드에서 처리됩니다."}

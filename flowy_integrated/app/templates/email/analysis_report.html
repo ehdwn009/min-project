@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회의록 분석 결과: {{ meeting_info.subj }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 700px; margin: auto; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #3498db; margin-top: 30px; }
+        ul { list-style-type: disc; padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }
+        .section p { margin: 5px 0; }
+        .attendee-task { margin-left: 20px; }
+        .attendee-task strong { display: block; margin-top: 10px; }
+        .feedback-item { margin-bottom: 5px; }
+        .footer { text-align: center; margin-top: 30px; font-size: 0.9em; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>회의록 분석 결과: {{ meeting_info.subj }}</h1>
+
+        <div class="section">
+            <h2>회의 정보</h2>
+            <p><strong>주제:</strong> {{ meeting_info.subj }}</p>
+            <p><strong>일시:</strong> {{ meeting_info.dt }}</p>
+            <p><strong>장소:</strong> {{ meeting_info.loc }}</p>
+            <p><strong>참석자:</strong></p>
+            <ul>
+                {% for attendee in meeting_info.info_n %}
+                <li>{{ attendee.name }}{% if attendee.role %} ({{ attendee.role }}){% endif %}{% if attendee.email %} - {{ attendee.email }}{% endif %}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% if stt_result and stt_result.rc_txt %}
+        <div class="section">
+            <h2>음성인식 결과 (STT)</h2>
+            <p>{{ stt_result.message }}</p>
+            <details>
+                <summary>전체 텍스트 보기 (클릭)</summary>
+                <p style="white-space: pre-wrap; background-color: #eee; padding: 10px; border-radius: 4px; max-height: 200px; overflow-y: auto;">{{ stt_result.rc_txt }}</p>
+            </details>
+        </div>
+        {% endif %}
+
+        {% if summary_result and summary_result.summary %}
+        <div class="section">
+            <h2>회의 요약</h2>
+            <p>{{ summary_result.message }}</p>
+            <ul>
+                {% for point in summary_result.summary %}
+                <li>{{ point }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if action_items_result and action_items_result.tasks %}
+        <div class="section">
+            <h2>할 일 목록</h2>
+            <p>{{ action_items_result.message }}</p>
+            {% for item_by_assignee in action_items_result.tasks %}
+            <div class="attendee-task">
+                <strong>{{ item_by_assignee.name }}{% if item_by_assignee.role %} ({{ item_by_assignee.role }}){% endif %}:</strong>
+                {% if item_by_assignee.tasks %}
+                <ul>
+                    {% for task in item_by_assignee.tasks %}
+                    <li>{{ task }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p><em>할당된 작업 없음</em></p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if feedback_result %}
+        <div class="section">
+            <h2>회의 피드백</h2>
+            <p><strong>필요 문장 비율:</strong> {{ feedback_result.necessary_ratio }}%</p>
+            <p><strong>불필요 문장 비율:</strong> {{ feedback_result.unnecessary_ratio }}%</p>
+            {% if feedback_result.representative_unnecessary %}
+            <p><strong>대표 불필요 문장:</strong></p>
+            <ul>
+                {% for item in feedback_result.representative_unnecessary %}
+                <li class="feedback-item">"{{ item.sentence }}" (이유: {{ item.reason }})</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="footer">
+            <p>본 이메일은 Flowy 회의록 분석 시스템에서 자동으로 발송되었습니다.</p>
+        </div>
+    </div>
+</body>
+</html>
