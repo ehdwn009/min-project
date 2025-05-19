@@ -3,16 +3,16 @@ from typing import Any, List, Optional
 from openai import OpenAI
 
 # 의존성 주입 함수 (main.py 에서 가져옴)
-from app.main import get_openai_client
+from flowy.main import get_openai_client
 
 # 서비스 함수 (summarizer_service.py 에서 가져옴)
-from app.services.summarizer_service import get_meeting_summary
+from flowy.services.summarizer_service import get_meeting_summary
 
 # 요청/응답 모델 (models/meeting.py 에서 가져옴)
-from app.models.meeting import SummarizationRequest, SummarizationResponse
+from flowy.models.meeting import SummarizationRequest, SummarizationResponse
 
 # 설정값 (config.py 에서 가져옴 - 모델명)
-from app.core.config import settings
+from flowy.core.config import settings
 
 
 router = APIRouter()

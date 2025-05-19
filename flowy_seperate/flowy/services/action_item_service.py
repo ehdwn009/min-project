@@ -1,4 +1,4 @@
-# app/services/action_item_service.py
+# flowy/services/action_item_service.py
 import json
 import re
 from typing import List, Dict, Any, Optional
@@ -6,7 +6,7 @@ from openai import OpenAI
 import asyncio
 
 # Pydantic 모델 임포트 (서비스 내부에서는 dict를 사용하거나, 여기서도 모델을 직접 사용할 수 있음)
-# from app.models.meeting import AttendeeInfo # 만약 서비스 함수가 Pydantic 모델을 직접 받는다면
+# from flowy.models.meeting import AttendeeInfo # 만약 서비스 함수가 Pydantic 모델을 직접 받는다면
 
 # --- 기존 action_item_extractor.py의 헬퍼 함수 ---
 # LLM 응답을 구조화된 리스트로 변환하는 로직

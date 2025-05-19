@@ -1,14 +1,14 @@
-# app/routers/feedback.py
+# flowy/routers/feedback.py
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Any, List
 from openai import OpenAI
 
-from app.main import get_openai_client
-from app.services.relevance_service import analyze_sentence_relevance_service
+from flowy.main import get_openai_client
+from flowy.services.relevance_service import analyze_sentence_relevance_service
 # FeedbackRequest에서 num_representative_unnecessary가 제거되었으므로,
 # 서비스 함수 호출 시 해당 값을 명시적으로 전달하지 않아도 서비스 함수의 기본값이 사용됩니다.
-from app.models.meeting import FeedbackRequest, MeetingFeedbackResponseModel, AttendeeInfo
-from app.core.config import settings
+from flowy.models.meeting import FeedbackRequest, MeetingFeedbackResponseModel, AttendeeInfo
+from flowy.core.config import settings
 
 router = APIRouter()
 

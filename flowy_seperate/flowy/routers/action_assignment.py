@@ -1,19 +1,19 @@
-# app/routers/action_assignment.py
+# flowy/routers/action_assignment.py
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Any, List # List 타입 힌팅 추가
 from openai import OpenAI
 
 # 의존성 주입 함수
-from app.main import get_openai_client
+from flowy.main import get_openai_client
 
 # 서비스 함수 (추후 생성)
-from app.services.action_item_service import extract_and_assign_action_items
+from flowy.services.action_item_service import extract_and_assign_action_items
 
 # 요청/응답 Pydantic 모델
-from app.models.meeting import ActionAssignmentRequest, ActionAssignmentResponse, AttendeeInfo # AttendeeInfo도 임포트
+from flowy.models.meeting import ActionAssignmentRequest, ActionAssignmentResponse, AttendeeInfo # AttendeeInfo도 임포트
 
 # 설정값
-from app.core.config import settings
+from flowy.core.config import settings
 
 router = APIRouter()
 

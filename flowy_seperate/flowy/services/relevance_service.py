@@ -1,4 +1,4 @@
-# app/services/relevance_service.py
+# flowy/services/relevance_service.py
 import json
 from typing import List, Dict, Any, Optional
 from openai import OpenAI

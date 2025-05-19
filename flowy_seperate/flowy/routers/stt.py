@@ -1,15 +1,15 @@
-# app/routers/stt.py
+# flowy/routers/stt.py
 from fastapi import APIRouter, File, UploadFile, Depends, HTTPException # Form 제거 가능
 from typing import Any # Optional 제거 가능
 
 # 의존성 주입 함수
-from app.main import get_stt_pipeline
+from flowy.main import get_stt_pipeline
 
 # 서비스 함수
-from app.services.stt_service import process_uploaded_rc_file_to_text
+from flowy.services.stt_service import process_uploaded_rc_file_to_text
 
 # 응답 모델
-from app.models.meeting import STTResponse
+from flowy.models.meeting import STTResponse
 
 router = APIRouter()
 

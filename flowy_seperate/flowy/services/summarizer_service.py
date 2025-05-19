@@ -1,4 +1,4 @@
-# app/services/summarizer_service.py
+# flowy/services/summarizer_service.py
 import json
 from typing import List, Optional
 from openai import OpenAI
